@@ -1,8 +1,7 @@
 using System.IO;
+using JamesFrowen.LargeFiles;
 using Mirror;
 using UnityEngine;
-
-using FileTransfer = JamesFrowen.LargeFiles.FileTransfer;
 
 public class ExampleFileTransferManager : NetworkManager
 {
@@ -10,9 +9,9 @@ public class ExampleFileTransferManager : NetworkManager
     public string label = "Bytes.bin";
     public int MaxKbPerSecond = 60;
 
-    private class Tracker : JamesFrowen.LargeFiles.IFileTransferProgress
+    private class Tracker : IFileTransferProgress
     {
-        public void OnSend(int sent, int total)
+        public void OnSend(long sent, long total)
         {
             Debug.Log($"Sent {sent} out of {total}");
         }
@@ -40,8 +39,6 @@ public class ExampleFileTransferManager : NetworkManager
         FileTransfer.OnFinishReceive += FileTransfer_OnFinishReceive;
     }
 
-
-
     private Stream CreateReceiveStream(NetworkConnection conn, FileTransfer.StartMessage msg)
     {
         // save to file, using label as name
@@ -50,7 +47,7 @@ public class ExampleFileTransferManager : NetworkManager
 
     private void FileTransfer_OnStartReceive(FileTransfer.Receiver obj)
     {
-        throw new System.NotImplementedException();
+        // do any setup here
     }
 
     private void FileTransfer_OnChunkReceive(FileTransfer.Receiver receiver)
@@ -63,6 +60,11 @@ public class ExampleFileTransferManager : NetworkManager
 
     private void FileTransfer_OnFinishReceive(FileTransfer.Receiver receiver)
     {
+        FileStream fs = (FileStream)receiver.Stream;
+        fs.Flush(flushToDisk: true);
+        fs.Close();
+        fs.Dispose();
+
         Debug.Log($"Receiveed {receiver.Received} bytes");
         // do stuff with file here
         // load the file using label

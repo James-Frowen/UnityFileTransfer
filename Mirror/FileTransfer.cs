@@ -196,6 +196,7 @@ namespace JamesFrowen.LargeFiles
             public readonly string Label;
             public readonly int SendId;
             public readonly NetworkConnection Connection;
+            public readonly long ExpectedLength;
 
             public Stream Stream;
             public long Received;
@@ -206,6 +207,7 @@ namespace JamesFrowen.LargeFiles
                 Connection = connection;
                 Label = msg.Label;
                 SendId = msg.SendId;
+                ExpectedLength = msg.Length;
             }
 
             public void ReceiveChunk(ChunkMessage msg)
